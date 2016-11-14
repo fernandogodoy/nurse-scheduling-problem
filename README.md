@@ -1,11 +1,9 @@
-# The nurse scheduling problem 
+# [The nurse scheduling problem](http://www.projectmanagement.ugent.be/?q=research/personnel_scheduling/nsp)
 
 The nurse scheduling problem is a well-known scheduling problem which assigns nurses to shifts per day taking both hard and soft constraints into account. The objective is to maximize the preferences of the nurses and to minimize the total penalty cost from violations of the soft constraints. In this research track, we present various novel meta-heuristic techniques based on the principles of Genetic Algorithmic search, Scatter Search principles, Electromagnetism, etc. Below, you can download the NSPLib benchmark instances, best known solutions, a problem generator as well as executables for various meta-heuristic procedures to solve the nurse scheduling problem.
 
-http://www.projectmanagement.ugent.be/?q=research/personnel_scheduling/nsp
 
-
-# Simulated Annealing
+# [Simulated Annealing](https://en.wikipedia.org/wiki/Simulated_annealing)
 
 Simulated annealing (SA) is a probabilistic technique for approximating the global optimum of a given function. Specifically, it is a metaheuristic to approximate global optimization in a large search space. It is often used when the search space is discrete (e.g., all tours that visit a given set of cities). For problems where finding an approximate global optimum is more important than finding a precise local optimum in a fixed amount of time, simulated annealing may be preferable to alternatives such as gradient descent.
 
