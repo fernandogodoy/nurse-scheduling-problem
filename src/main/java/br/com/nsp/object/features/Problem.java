@@ -36,12 +36,6 @@ public class Problem {
 				.collect(Collectors.toList());
 	}
 
-//	public List<DailyFrame> getQuadroDiario() {
-//		return diasTrabalho.parallelStream()
-//				.map(dia -> new DailyFrame(dia, turnosTrabalho))
-//				.collect(Collectors.toList());
-//	}
-
 	public List<Day> getDiasTrabalho() {
 		return diasTrabalho;
 	}
