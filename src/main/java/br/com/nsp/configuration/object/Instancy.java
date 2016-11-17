@@ -18,7 +18,11 @@ import br.com.nsp.configuration.object.file.FileGenLayout;
 import br.com.nsp.object.Day;
 import br.com.nsp.object.Nurse;
 import br.com.nsp.object.Shift;
+import br.com.nsp.object.features.AfternoonShift;
 import br.com.nsp.object.features.AttributionSequence;
+import br.com.nsp.object.features.DayOff;
+import br.com.nsp.object.features.MorningShift;
+import br.com.nsp.object.features.NightShift;
 import br.com.nsp.object.features.Problem;
 import br.com.nsp.object.features.WorkedSequence;
 
@@ -30,6 +34,10 @@ public class Instancy {
 	private WorkedSequence workedSequence;
 	private AttributionSequence attributionSequence;
 	private MannagerConfig mConfig;
+	private MorningShift morningShift;
+	private AfternoonShift afternoonShift;
+	private NightShift nightShift;
+	private DayOff dayOff;
 
 	public Instancy(FileGenLayout layout, MannagerConfig mConfig) {
 		this.mConfig = mConfig;
@@ -37,6 +45,10 @@ public class Instancy {
 		this.problem = layout.getProblem();
 		this.workedSequence = layout.getWorkedSequence();
 		this.attributionSequence = layout.getAttributionSequence();
+		this.morningShift = layout.getMorningShift();
+		afternoonShift = layout.getAfternoonShift();
+		nightShift = layout.getNightShift();
+		dayOff = layout.getDayOff();
 	}
 
 	public Map<Nurse, List<Solluction>> gerarSolucao() {
@@ -130,6 +142,22 @@ public class Instancy {
 
 	public AttributionSequence getAttributionSequence() {
 		return attributionSequence;
+	}
+
+	public MorningShift getMorningShift() {
+		return morningShift;
+	}
+
+	public AfternoonShift getAfternoonShift() {
+		return afternoonShift;
+	}
+
+	public NightShift getNightShift() {
+		return nightShift;
+	}
+
+	public DayOff getDayOff() {
+		return dayOff;
 	}
 
 }
