@@ -12,19 +12,13 @@ import br.com.nsp.configuration.object.Instancy;
 
 public class PenaltyTest {
 	
-	private Penalty penalty;
+	private SoftConstraint penalty;
 
 	@Before
 	public void init(){
 		MannagerConfig mc = new MannagerConfig();
 		Instancy instancia = mc.getInstancia("1.gen");
-		penalty = new Penalty(instancia, mc.getPreferencias(), instancia.gerarSolucao());
-	}
-	
-	@Test
-	public void testAtribuicoesConsecultivas(){
-		BigDecimal valor = penalty.penalizarAtribuicoesConsecutivas();
-		assertNotEquals(BigDecimal.ZERO, valor);
+		penalty = new SoftConstraint(instancia, mc.getPreferencias(), instancia.gerarSolucao());
 	}
 	
 	@Test

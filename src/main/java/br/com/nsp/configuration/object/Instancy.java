@@ -46,9 +46,9 @@ public class Instancy {
 		this.workedSequence = layout.getWorkedSequence();
 		this.attributionSequence = layout.getAttributionSequence();
 		this.morningShift = layout.getMorningShift();
-		afternoonShift = layout.getAfternoonShift();
-		nightShift = layout.getNightShift();
-		dayOff = layout.getDayOff();
+		this.afternoonShift = layout.getAfternoonShift();
+		this.nightShift = layout.getNightShift();
+		this.dayOff = layout.getDayOff();
 	}
 
 	public Map<Nurse, List<Solluction>> gerarSolucao() {
@@ -93,7 +93,6 @@ public class Instancy {
 		
 		while (enfermeiros.size() > qtdDemanda && (qtdTurnosExtras > 0 || map.isEmpty())) {
 				turnos.forEach(turno -> {
-					Collections.shuffle(enfermeiros);
 					List<Nurse> selecionados = selecionarEnfermeirosPorDemanda(dia, enfermeiros, turno);
 					enfermeiros.removeAll(selecionados);
 					List<Nurse> list = map.get(turno);
@@ -110,7 +109,16 @@ public class Instancy {
 		return map;
 	}
 
+	/**
+	 * Seleciona enfermeiros de forma aleatória de acordo com a demanda do dia.
+	 * 
+	 * @param dia
+	 * @param enfermeiros
+	 * @param turno
+	 * @return
+	 */
 	private List<Nurse> selecionarEnfermeirosPorDemanda(Day dia, List<Nurse> enfermeiros, Shift turno) {
+		Collections.shuffle(enfermeiros);
 		return enfermeiros.parallelStream()
 				.limit(mConfig.getQtdDemandaPorTurno(dia, turno))
 				.collect(toList());

@@ -24,7 +24,7 @@ public class Config {
 
 	// =================== PENALIDADES ============================
 
-	private static BigDecimal valorPenalidadeRigida = new BigDecimal("100");
+	private static BigDecimal valorPenalidadeRigida = new BigDecimal("1000");
 	private static BigDecimal valorPenalidadeLeve = new BigDecimal("100");
 
 	// ==============================================================

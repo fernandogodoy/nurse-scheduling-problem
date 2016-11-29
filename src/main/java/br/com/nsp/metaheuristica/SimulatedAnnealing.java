@@ -12,14 +12,21 @@ import br.com.nsp.configuration.MannagerConfig;
 import br.com.nsp.configuration.object.Instancy;
 import br.com.nsp.configuration.object.Preference;
 import br.com.nsp.configuration.object.Solluction;
+import br.com.nsp.object.Constraint;
+import br.com.nsp.object.HardConstraint;
 import br.com.nsp.object.Nurse;
-import br.com.nsp.object.Penalty;
+import br.com.nsp.object.SoftConstraint;
+import br.com.nsp.util.Util;
 
 public class SimulatedAnnealing {
 
 	public static void main(String[] args) {
+		
+		Instant inicio = Instant.now();
+		
 		SimulatedAnnealing sa = new SimulatedAnnealing();
 		MannagerConfig mConfig = new MannagerConfig();
+		
 		Instancy instancia = mConfig.getInstancia("1.gen");
 		Map<Nurse, List<Preference>> prefers = mConfig.getPreferencias();
 		
@@ -30,37 +37,35 @@ public class SimulatedAnnealing {
 		System.out.println("Iniciando Resolução instância: " + instancia.getFileName());
 		
 		Map<Nurse, List<Solluction>> solucao = instancia.gerarSolucao();
-		Penalty penalidade = new Penalty(instancia, prefers, solucao);
-		BigDecimal custo = penalidade.calcular();
+		
+		BigDecimal custoTotal = sa.calcularCustos(instancia, prefers, solucao);
 		
 		melhorSolucao = solucao;
-		custoMelhorSolucao = custo;
+		custoMelhorSolucao = custoTotal;
 		
-		System.out.println("Custo da Solução Inicial: " + custo);
+		System.out.println("Custo da Solução Inicial: " + custoTotal);
 		System.out.println("======================================================");
 		
 		double temperaturaInicial = Config.getTemperaturaInicial();
 		double temperaturaMinima = Config.getTemperaturaMinima();
 		double taxaResfriamento = Config.getTaxaResfriamento();
 		
-		Instant inicio = Instant.now();
-
 		while (temperaturaInicial > temperaturaMinima) {
 			int iteracoes = Config.getNumeroDeIteracoes();
 			while (iteracoes >= 1) {
 
 				Map<Nurse, List<Solluction>> novaSolucao = instancia.gerarSolucao();
-				Penalty novaPenalidade = new Penalty(instancia, prefers, novaSolucao);
-				BigDecimal custoNovaSolucao = novaPenalidade.calcular();
 
-				if (sa.probabilidadeAceitacao(custo, custoNovaSolucao, temperaturaInicial) > Math.random()) {
-					custo = custoNovaSolucao;
+				BigDecimal custoTotalNovaSolucao = sa.calcularCustos(instancia, prefers, solucao);
+
+				if (sa.probabilidadeAceitacao(custoTotal, custoTotalNovaSolucao, temperaturaInicial) > Math.random()) {
+					custoTotal = custoTotalNovaSolucao;
 					solucao = novaSolucao;
 				}
 
-				if (custo.compareTo(custoMelhorSolucao) == -1) {
-					System.out.println("Removeu: " + custoMelhorSolucao.subtract(custoNovaSolucao) + " penalidades");
-					custoMelhorSolucao = custo;
+				if (custoTotal.compareTo(custoMelhorSolucao) == -1) {
+					System.out.println("Removeu: " + custoMelhorSolucao.subtract(custoTotal) + " penalidades");
+					custoMelhorSolucao = custoTotal;
 					melhorSolucao = solucao;
 					temperaturaInicial = Config.getTemperaturaInicial();
 				}
@@ -74,22 +79,26 @@ public class SimulatedAnnealing {
 		System.out.println("Total Penalidades= " + custoMelhorSolucao);
 		System.out.println("Tempo gasto em segundos:" + Duration.between(inicio, fim).getSeconds());
 		System.out.println("======================================================");
-		sa.escreverSolucao(melhorSolucao);
+		
+		Util.printToConsole(melhorSolucao);
+	}
+
+
+
+	private BigDecimal calcularCustos(Instancy instancia, Map<Nurse, List<Preference>> prefers,
+			Map<Nurse, List<Solluction>> solucao) {
+		
+		Constraint softConstraint = new SoftConstraint(instancia, prefers, solucao);
+		Constraint hardConstraint = new HardConstraint(solucao);
+		
+		BigDecimal custoSoft = softConstraint.calcular();
+		BigDecimal custoHard = hardConstraint.calcular();
+		BigDecimal custoTotal = custoHard.add(custoSoft);
+		
+		return custoTotal;
 	}
 	
-	private void escreverSolucao(Map<Nurse, List<Solluction>> solucao){
-		StringBuilder sb = new StringBuilder();
-		solucao.entrySet().stream().forEach(sol ->{
-			sb.append(sol.getKey()).append(" [ ");
-			sol.getValue().forEach(val ->{
-				sb.append(val.getDia()).append(" - ").append(val.getTurno()).append(" / ");
-			});
-			sb.delete(sb.length() - 3, sb.length());
-			sb.append(" ]\n");
-			
-		});
-		System.out.println(sb.toString());
-	}
+	
 	
 	/**
 	 * Fator de Boltzmann
