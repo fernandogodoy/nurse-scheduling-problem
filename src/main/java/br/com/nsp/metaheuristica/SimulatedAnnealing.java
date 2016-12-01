@@ -37,7 +37,6 @@ public class SimulatedAnnealing {
 		System.out.println("Iniciando Resolução instância: " + instancia.getFileName());
 		
 		Map<Nurse, List<Solluction>> solucao = instancia.gerarSolucao();
-		
 		BigDecimal custoTotal = sa.calcularCustos(instancia, prefers, solucao);
 		
 		melhorSolucao = solucao;
@@ -55,8 +54,7 @@ public class SimulatedAnnealing {
 			while (iteracoes >= 1) {
 
 				Map<Nurse, List<Solluction>> novaSolucao = instancia.gerarSolucao();
-
-				BigDecimal custoTotalNovaSolucao = sa.calcularCustos(instancia, prefers, solucao);
+				BigDecimal custoTotalNovaSolucao = sa.calcularCustos(instancia, prefers, novaSolucao);
 
 				if (sa.probabilidadeAceitacao(custoTotal, custoTotalNovaSolucao, temperaturaInicial) > Math.random()) {
 					custoTotal = custoTotalNovaSolucao;
@@ -89,7 +87,7 @@ public class SimulatedAnnealing {
 			Map<Nurse, List<Solluction>> solucao) {
 		
 		Constraint softConstraint = new SoftConstraint(instancia, prefers, solucao);
-		Constraint hardConstraint = new HardConstraint(solucao);
+		Constraint hardConstraint = new HardConstraint(solucao, instancia);
 		
 		BigDecimal custoSoft = softConstraint.calcular();
 		BigDecimal custoHard = hardConstraint.calcular();
