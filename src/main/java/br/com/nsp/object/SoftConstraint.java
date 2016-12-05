@@ -37,55 +37,56 @@ public class SoftConstraint implements Constraint {
 
 	public BigDecimal penalizarLimiteDiasTrabalhados(){
 		penalidade = BigDecimal.ZERO;
-		for(int nurseCount = 1; nurseCount < solucao.size(); nurseCount ++){
-			List<Solluction> listSols = getSolucoesPorEnfermeiro(nurseCount);
+		solucao.entrySet().forEach(sols ->{
+			List<Solluction> listSols = getSolucoesPorEnfermeiro(sols.getKey());
 			long count = listSols.parallelStream()
 								.filter(sol -> !sol.getTurno().equals(Shift.F))
 								.count();
 			if (count < workedSequence.getMin() || count > workedSequence.getMax()) {
 				penalidade = penalidade.add(Config.getValorPenalidadeLeve());
 			}
-		}
+		});
+		
 		return penalidade;
 	}
 	
 	public BigDecimal penalizarPreferencias(){
 		penalidade = BigDecimal.ZERO;
 		Arrays.asList(Day.values()).forEach(dia ->{
-			for(int nurseCount = 1;nurseCount < solucao.size(); nurseCount++){
-				List<Preference> listPrefs = getPreferencias(nurseCount);
-				List<Solluction> listSols = getSolucoesPorEnfermeiro(nurseCount);
-				Preference preference = getPreferencia(listPrefs, dia, nurseCount);
-				Solluction solluction = getSolucao(listSols, dia, nurseCount);
+			solucao.entrySet().forEach( sols ->{
+				List<Preference> listPrefs = getPreferencias(sols.getKey());
+				List<Solluction> listSols = getSolucoesPorEnfermeiro(sols.getKey());
+				Preference preference = getPreferencia(listPrefs, dia, sols.getKey());
+				Solluction solluction = getSolucao(listSols, dia, sols.getKey());
 				if(!solluction.getTurno().equals(preference.getTurno())){
 					penalidade = penalidade.add(new BigDecimal(preference.getPeso()));
 				}
-			}
+			});
 		});
 		
 		return penalidade;
 	}
 
-	private Preference getPreferencia(List<Preference> listPrefs, Day dia, int nurseCount) {
+	private Preference getPreferencia(List<Preference> listPrefs, Day dia, Nurse enfermeiro) {
 		return listPrefs.parallelStream()
-				.filter(pref -> pref.getEnfermeiro().getIdentificacao() == nurseCount)
+				.filter(pref -> pref.getEnfermeiro().equals(enfermeiro))
 				.filter(pref -> pref.getDia().equals(dia))
 				.findFirst()
 				.get();
 	}
 
-	private Solluction getSolucao(List<Solluction> listSols, Day dia, int nurseCount) {
+	private Solluction getSolucao(List<Solluction> listSols, Day dia, Nurse enfermeiro) {
 		return listSols.parallelStream()
-				.filter(sol -> sol.getEnfermeiro().getIdentificacao() == nurseCount)
+				.filter(sol -> sol.getEnfermeiro().equals(enfermeiro))
 				.filter(sol -> sol.getDia().equals(dia))
 				.findFirst()
 				.get();
 	}
 
 
-	private List<Preference> getPreferencias(Integer identificador ) {
+	private List<Preference> getPreferencias(Nurse enfermeiro) {
 		return preferencias.entrySet().parallelStream()
-				.filter(pre -> pre.getKey().getIdentificacao() == identificador)
+				.filter(pre -> pre.getKey().equals(enfermeiro))
 				.findFirst()
 				.get()
 				.getValue();

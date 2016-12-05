@@ -17,7 +17,12 @@ public class Util {
 		solucao.entrySet().stream().forEach(sol ->{
 			sb.append(sol.getKey()).append(" [ ");
 			sol.getValue().forEach(val ->{
-				sb.append(val.getDia()).append(" - ").append(val.getTurno()).append(" / ");
+				sb.append(val.getDia())
+					.append(" - ")
+					.append(val.getTurno())
+					.append(" - ")
+					.append(val.getAlocation().getType())
+					.append(" / ");
 			});
 			sb.delete(sb.length() - 3, sb.length());
 			sb.append(" ]\n");

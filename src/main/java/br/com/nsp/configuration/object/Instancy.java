@@ -11,13 +11,16 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import br.com.nsp.configuration.Config;
 import br.com.nsp.configuration.MannagerConfig;
 import br.com.nsp.configuration.object.file.FileGenLayout;
+import br.com.nsp.object.Alocation;
 import br.com.nsp.object.Day;
 import br.com.nsp.object.Nurse;
 import br.com.nsp.object.Shift;
+import br.com.nsp.object.TypeAlocation;
 import br.com.nsp.object.features.AfternoonShift;
 import br.com.nsp.object.features.AttributionSequence;
 import br.com.nsp.object.features.DayOff;
@@ -38,7 +41,7 @@ public class Instancy {
 	private AfternoonShift afternoonShift;
 	private NightShift nightShift;
 	private DayOff dayOff;
-
+	
 	public Instancy(FileGenLayout layout, MannagerConfig mConfig) {
 		this.mConfig = mConfig;
 		this.fileName = layout.getFileName();
@@ -52,18 +55,20 @@ public class Instancy {
 	}
 
 	public Map<Nurse, List<Solluction>> gerarSolucao() {
-		Map<Day, Map<Shift, List<Nurse>>> map = designarDiasTrabalho();
-		return criarQuadroTrabalho(map);
+		Map<Day, Map<Shift, List<Alocation>>> map = designarDiasTrabalho();
+		Map<Nurse, List<Solluction>> escala = criarQuadroTrabalho(map);
+		return escala;
 	}
-
-	private Map<Nurse, List<Solluction>> criarQuadroTrabalho(Map<Day, Map<Shift, List<Nurse>>> map) {
+	
+	private Map<Nurse, List<Solluction>> criarQuadroTrabalho(Map<Day, Map<Shift, List<Alocation>>> map) {
 		List<Solluction> solucoes = new LinkedList<>();
 		for (Nurse nurse : mConfig.getEnfermeiros()) {
 			map.entrySet().forEach(mdia ->{
 				mdia.getValue().entrySet().forEach(mturno ->{
-					List<Nurse> list = mturno.getValue();
-					if(list.contains(nurse)){
-						solucoes.add(new Solluction(nurse, mdia.getKey(), mturno.getKey()));
+					List<Alocation> list = mturno.getValue();
+					Optional<Alocation> optional = list.stream().filter(aloc -> aloc.getEnfermeiro().equals(nurse)).findFirst();
+					if(optional.isPresent()){
+						solucoes.add(new Solluction(nurse, mdia.getKey(), mturno.getKey(), optional.get()));
 					}
 				});
 			});
@@ -72,39 +77,49 @@ public class Instancy {
 				.collect(groupingBy(Solluction::getEnfermeiro));
 	}
 
-	private Map<Day, Map<Shift, List<Nurse>>> designarDiasTrabalho() {
-		Map<Day, Map<Shift, List<Nurse>>> mDays = new LinkedHashMap<>(); 
+	private Map<Day, Map<Shift, List<Alocation>>> designarDiasTrabalho() {
+		Map<Day, Map<Shift, List<Alocation>>> mDays = new LinkedHashMap<>(); 
 		
 		List<Shift> turnos = Arrays.asList(Shift.values());
 		Arrays.asList(Day.values()).forEach(dia -> {
-			Map<Shift, List<Nurse>> map = designarTurnosPorDia(dia, turnos);
+			Map<Shift, List<Alocation>> map = designarTurnosPorDia(dia, turnos);
 			mDays.put(dia, map);
 		});
 		
 		return mDays;
 	}
 
-	private Map<Shift, List<Nurse>> designarTurnosPorDia(Day dia, List<Shift> turnos) {
-		Map<Shift, List<Nurse>> map = new HashMap<>();
+	private Map<Shift, List<Alocation>> designarTurnosPorDia(Day dia, List<Shift> turnos) {
+		Map<Shift, List<Alocation>> map = new HashMap<>();
 		List<Nurse> enfermeiros = new ArrayList<>(mConfig.getEnfermeiros());
 		
 		int qtdTurnosExtras = calcularQtdTurnosExtras(dia);
 		Integer qtdDemanda = mConfig.sumQtdDemanda(dia);
-		
+		boolean isTurnoExtra = false;
 		while (enfermeiros.size() > qtdDemanda && (qtdTurnosExtras > 0 || map.isEmpty())) {
+			TypeAlocation type = isTurnoExtra ? TypeAlocation.E: TypeAlocation.D;
 				turnos.forEach(turno -> {
 					List<Nurse> selecionados = selecionarEnfermeirosPorDemanda(dia, enfermeiros, turno);
 					enfermeiros.removeAll(selecionados);
-					List<Nurse> list = map.get(turno);
-					if (list == null) {
+					List<Alocation> list = map.get(turno);
+					if(list == null){
 						list = new ArrayList<>();
 					}
-					list.addAll(selecionados);
+					List<Alocation> alocations = selecionados.stream()
+																.map(m -> new Alocation(m, type))
+																.collect(toList());
+					
+					list.addAll(alocations);
 					map.put(turno, list);
 				});
 			qtdTurnosExtras--;
+			isTurnoExtra = true;
 		}
-		map.put(Shift.F, enfermeiros);
+		
+		List<Alocation> alocations = enfermeiros.stream()
+												.map(enf -> new Alocation(enf, TypeAlocation.E))
+												.collect(toList());
+		map.put(Shift.F, alocations);
 		
 		return map;
 	}

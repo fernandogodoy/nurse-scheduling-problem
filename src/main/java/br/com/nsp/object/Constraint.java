@@ -14,9 +14,9 @@ public interface Constraint {
 
 	public BigDecimal calcular();
 	
-	public default List<Solluction> getSolucoesPorEnfermeiro(Integer identificador) {
+	public default List<Solluction> getSolucoesPorEnfermeiro(Nurse enfermeiro) {
 		return getSolucao().entrySet().parallelStream()
-				.filter(sol -> sol.getKey().getIdentificacao() == identificador)
+				.filter(sol -> sol.getKey().equals(enfermeiro))
 				.findFirst()
 				.get()
 				.getValue();

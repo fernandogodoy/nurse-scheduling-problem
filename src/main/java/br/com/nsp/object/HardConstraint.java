@@ -37,8 +37,8 @@ public class HardConstraint implements Constraint {
 
 	private BigDecimal penalizarTurno() {
 		penalidade = BigDecimal.ZERO;
-		for (int nurseCount = 1; nurseCount < solucao.size(); nurseCount++) {
-			List<Solluction> listSols = getSolucoesPorEnfermeiro(nurseCount);
+		solucao.entrySet().forEach(sols ->{
+			List<Solluction> listSols = getSolucoesPorEnfermeiro(sols.getKey());
 			penalizarMinMaxManha(listSols);
 			penalizarMinMaxTarde(listSols);
 			penalizarMinMaxNoite(listSols);
@@ -64,6 +64,10 @@ public class HardConstraint implements Constraint {
 			}
 
 			atribuirPenalidade(manhaConsecutiva, tardeConsecutiva, noiteConsecutiva, folgaConsecutiva, atribuicaoConsecutiva);
+		});
+		
+		for (int nurseCount = 1; nurseCount < solucao.size(); nurseCount++) {
+			
 
 		}
 		return penalidade;
@@ -187,8 +191,8 @@ public class HardConstraint implements Constraint {
 
 	private BigDecimal penalizarTurnoSubsequente() {
 		penalidade = BigDecimal.ZERO;
-		for (int nurseCount = 1; nurseCount < solucao.size(); nurseCount++) {
-			List<Solluction> listSols = getSolucoesPorEnfermeiro(nurseCount);
+		solucao.entrySet().forEach(sols ->{
+			List<Solluction> listSols = getSolucoesPorEnfermeiro(sols.getKey());
 			String anterior = null;
 			for (Solluction solluction : listSols) {
 				Shift atual = solluction.getTurno();
@@ -197,8 +201,7 @@ public class HardConstraint implements Constraint {
 				}
 				anterior = atual.name();
 			}
-
-		}
+		});
 		return penalidade;
 	}
 

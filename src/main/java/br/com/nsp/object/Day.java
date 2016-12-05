@@ -1,5 +1,8 @@
 package br.com.nsp.object;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 /**
  * Representação para dias da semana
  * 
@@ -25,5 +28,12 @@ public enum Day {
 	@Override
 	public String toString() {
 		return descricao;
+	}
+	
+	public static Optional<Day> getDay(Integer ordinal){
+		return Arrays.asList(Day.values())
+				.parallelStream()
+				.filter(dia -> dia.ordinal() == ordinal)
+				.findFirst();
 	}
 }

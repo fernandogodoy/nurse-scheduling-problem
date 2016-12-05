@@ -12,10 +12,8 @@ import br.com.nsp.configuration.MannagerConfig;
 import br.com.nsp.configuration.object.Instancy;
 import br.com.nsp.configuration.object.Preference;
 import br.com.nsp.configuration.object.Solluction;
-import br.com.nsp.object.Constraint;
-import br.com.nsp.object.HardConstraint;
+import br.com.nsp.object.ConstraintCalculation;
 import br.com.nsp.object.Nurse;
-import br.com.nsp.object.SoftConstraint;
 import br.com.nsp.util.Util;
 
 public class SimulatedAnnealing {
@@ -37,7 +35,7 @@ public class SimulatedAnnealing {
 		System.out.println("Iniciando Resolução instância: " + instancia.getFileName());
 		
 		Map<Nurse, List<Solluction>> solucao = instancia.gerarSolucao();
-		BigDecimal custoTotal = sa.calcularCustos(instancia, prefers, solucao);
+		BigDecimal custoTotal = ConstraintCalculation.calcular(instancia, prefers, solucao);
 		
 		melhorSolucao = solucao;
 		custoMelhorSolucao = custoTotal;
@@ -54,7 +52,7 @@ public class SimulatedAnnealing {
 			while (iteracoes >= 1) {
 
 				Map<Nurse, List<Solluction>> novaSolucao = instancia.gerarSolucao();
-				BigDecimal custoTotalNovaSolucao = sa.calcularCustos(instancia, prefers, novaSolucao);
+				BigDecimal custoTotalNovaSolucao = ConstraintCalculation.calcular(instancia, prefers, novaSolucao);
 
 				if (sa.probabilidadeAceitacao(custoTotal, custoTotalNovaSolucao, temperaturaInicial) > Math.random()) {
 					custoTotal = custoTotalNovaSolucao;
@@ -66,6 +64,7 @@ public class SimulatedAnnealing {
 					custoMelhorSolucao = custoTotal;
 					melhorSolucao = solucao;
 					temperaturaInicial = Config.getTemperaturaInicial();
+					iteracoes = Config.getNumeroDeIteracoes();
 				}
 				iteracoes--;
 			}
@@ -81,23 +80,6 @@ public class SimulatedAnnealing {
 		Util.printToConsole(melhorSolucao);
 	}
 
-
-
-	private BigDecimal calcularCustos(Instancy instancia, Map<Nurse, List<Preference>> prefers,
-			Map<Nurse, List<Solluction>> solucao) {
-		
-		Constraint softConstraint = new SoftConstraint(instancia, prefers, solucao);
-		Constraint hardConstraint = new HardConstraint(solucao, instancia);
-		
-		BigDecimal custoSoft = softConstraint.calcular();
-		BigDecimal custoHard = hardConstraint.calcular();
-		BigDecimal custoTotal = custoHard.add(custoSoft);
-		
-		return custoTotal;
-	}
-	
-	
-	
 	/**
 	 * Fator de Boltzmann
 	 * 
